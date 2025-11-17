@@ -2,6 +2,12 @@ Scriptname BRFS:Controller extends Quest
 
 ActorBase Property BRFS_Guard Auto Const
 ActorBase Property BRFS_Slave Auto Const
+Outfit Property BRFS_Outfit_Guard_Default Auto Const
+
+Event OnInit()
+    ; TODO: Remove in production
+    SetGuardOutfit("1000087b,1000087e,1000088a,10000883")
+EndEvent
 
 Function AddActor(String actorType, String name="")
     If actorType == "Guard"
@@ -15,6 +21,10 @@ Function AddActor(String actorType, String name="")
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     EndIf
+EndFunction
+
+Function SetGuardOutfit(String formIds)
+    System:Outfit.SetParts(BRFS_Outfit_Guard_Default, BRFS:Util.StringToFormArray(formIds))
 EndFunction
 
 Function CreateConvoy(ObjectReference[] members)
