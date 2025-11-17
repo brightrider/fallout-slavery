@@ -2,6 +2,7 @@ Scriptname BRFS:Controller extends Quest
 
 ActorBase Property BRFS_Guard Auto Const
 ActorBase Property BRFS_Slave Auto Const
+Faction Property BRFS_Actors Auto Const
 Outfit Property BRFS_Outfit_Guard_Default Auto Const
 
 Event OnInit()
@@ -23,11 +24,24 @@ Function AddActor(String actorType, String name="")
     EndIf
 EndFunction
 
+Function ListActors()
+    BRFS:NPC[] actors = GardenOfEden2.GetFactionMembers(BRFS_Actors) as BRFS:NPC[]
+    Int i = 0
+    While i < actors.Length
+        System:Console.WriteLine(actors[i].GetDescription())
+        i += 1
+    EndWhile
+EndFunction
+
 Function SetGuardOutfit(String formIds)
     System:Outfit.SetParts(BRFS_Outfit_Guard_Default, BRFS:Util.StringToFormArray(formIds))
 EndFunction
 
-Function CreateConvoy(ObjectReference[] members)
+Function CreateConvoy(String members)
+    CreateConvoyInternal(BRFS:Util.StringToRuntimeRefArray(members))
+EndFunction
+
+Function CreateConvoyInternal(ObjectReference[] members)
     Int i = 1
     While i < members.Length
         (members[i] as BRFS:NPC).Follow(members[i - 1])

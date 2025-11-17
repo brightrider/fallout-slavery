@@ -1,5 +1,7 @@
 Scriptname BRFS:NPC extends Actor
 
+BRFS:MarkerController Property BRFS_MarkerController Auto Const
+
 Faction Property BRFS_Guards Auto Const
 Faction Property BRFS_Slaves Auto Const
 
@@ -49,6 +51,14 @@ Function Travel(ObjectReference target, Bool bypassLock=False)
     ReleaseLock(bypassLock)
 EndFunction
 
+Function TravelMarker(String target, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    Travel(BRFS_MarkerController.Get(target), bypassLock=True)
+
+    ReleaseLock(bypassLock)
+EndFunction
+
 Function Follow(ObjectReference target, Bool bypassLock=False)
     AcquireLock(bypassLock)
 
@@ -71,13 +81,31 @@ Function UseIdleMarker(ObjectReference target, ObjectReference secondTarget=None
     ReleaseLock(bypassLock)
 EndFunction
 
-Function UseWeapon(ObjectReference loc, ObjectReference target, Bool bypassLock=False)
+Function UseIdleMarkerByName(String target, ObjectReference secondTarget=None, Bool bypassLock=False)
     AcquireLock(bypassLock)
 
-    SetLinkedRef(loc, BRFS_PackageKeyword1)
+    UseIdleMarker(BRFS_MarkerController.Get(target), secondTarget, bypassLock=True)
+
+    ReleaseLock(bypassLock)
+EndFunction
+
+Function UseWeapon(ObjectReference target, ObjectReference loc, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    If loc
+        SetLinkedRef(loc, BRFS_PackageKeyword1)
+    EndIf
     SetLinkedRef(target, BRFS_PackageKeyword2)
     SetValue(Variable08, 4)
     EvaluatePackage()
+
+    ReleaseLock(bypassLock)
+EndFunction
+
+Function UseWeaponMarker(ObjectReference target, String loc, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    UseWeapon(target, BRFS_MarkerController.Get(loc), bypassLock=True)
 
     ReleaseLock(bypassLock)
 EndFunction
@@ -90,7 +118,7 @@ Function ToggleUseWeapon()
 
     If IsGuard()
         If IsUsingIdleMarker() && slot2
-            UseWeapon(slot1, slot2, bypassLock=True)
+            UseWeapon(slot2, slot1, bypassLock=True)
         ElseIf IsUsingWeapon()
             UseIdleMarker(slot1, slot2, bypassLock=True)
         EndIf
@@ -106,6 +134,14 @@ Function Patrol(ObjectReference p1, ObjectReference p2, Bool bypassLock=False)
     SetLinkedRef(p2, BRFS_PackageKeyword2)
     SetValue(Variable08, 6)
     EvaluatePackage()
+
+    ReleaseLock(bypassLock)
+EndFunction
+
+Function PatrolMarker(String p1, String p2, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    Patrol(BRFS_MarkerController.Get(p1), BRFS_MarkerController.Get(p2), bypassLock=True)
 
     ReleaseLock(bypassLock)
 EndFunction
@@ -162,7 +198,7 @@ String Function GetDescription()
         procedure = "Patrolling"
     EndIf
 
-    Return GetDisplayName() + "[" + GetFormID() + ", " + type + ", " + aliveStatus + "] " + procedure
+    Return GetDisplayName() + "[" + System:Int32.ToString(GetFormID(), "{:X}") + ", " + type + ", " + aliveStatus + "] " + procedure
 EndFunction
 
 ; ##############################################################################

@@ -48,7 +48,26 @@ String[] Function GetNames()
     Return names
 EndFunction
 
-Function CreateGrid(String name, Int[] grid, Int width, Int offX=192, Int offY=512)
+Function List()
+    String[] names = GetNames()
+    Int i = 0
+    While i < names.Length
+        System:Console.WriteLine(names[i])
+        i += 1
+    EndWhile
+EndFunction
+
+Function CreateGrid(String name, String grid, Int width, Int offX, Int offY)
+    If offX == 0
+        offX = 192
+    EndIf
+    If offY == 0
+        offY = 512
+    EndIf
+    CreateGridInternal(name, BRFS:Util.StringToIntArray(grid), width, offX, offY)
+EndFunction
+
+Function CreateGridInternal(String name, Int[] grid, Int width, Int offX=192, Int offY=512)
     Int i = 0
     While i < grid.Length
         ObjectReference marker = Add(name + i)
