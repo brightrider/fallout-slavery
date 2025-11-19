@@ -17,6 +17,26 @@ BRFS:NPC Function GetActorByDisplayName(String name) global
     EndWhile
 EndFunction
 
+Actor Function GetPlayerOrActorByDisplayName(String name) global
+    If name == "player"
+        Return Game.GetPlayer()
+    EndIf
+    Return GetActorByDisplayName(name)
+EndFunction
+
+ObjectReference[] Function DisplayNamesToRefArray(String arg, String sep=",") global
+    ObjectReference[] result = new ObjectReference[0]
+
+    String[] parts = System:Strings.Split(arg, sep)
+    Int i = 0
+    While i < parts.Length
+        result.Add(GetPlayerOrActorByDisplayName(parts[i]))
+        i += 1
+    EndWhile
+
+    Return result
+EndFunction
+
 Int[] Function StringToIntArray(String arg, String sep=",") global
     Int[] result = new Int[0]
 

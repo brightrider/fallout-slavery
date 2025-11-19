@@ -38,13 +38,13 @@ Function SetGuardOutfit(String formIds)
 EndFunction
 
 Function CreateConvoy(String members)
-    CreateConvoyInternal(BRFS:Util.StringToRuntimeRefArray(members))
+    CreateConvoyInternal(BRFS:Util.DisplayNamesToRefArray(members))
 EndFunction
 
 Function CreateConvoyInternal(ObjectReference[] members)
     Int i = 1
     While i < members.Length
-        (members[i] as BRFS:NPC).Follow(members[i - 1])
+        (members[i] as BRFS:NPC).FollowInternal(members[i - 1])
         i += 1
     EndWhile
 EndFunction

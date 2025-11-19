@@ -29,142 +29,94 @@ Bool Function IsSlave()
     Return IsInFaction(BRFS_Slaves)
 EndFunction
 
-Function Wait(Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
+Function Wait()
     SetLinkedRef(None, BRFS_PackageKeyword1)
     SetLinkedRef(None, BRFS_PackageKeyword2)
     SetValue(Variable08, 0)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
 EndFunction
 
-Function Travel(ObjectReference target, Bool bypassLock=False)
-    AcquireLock(bypassLock)
+Function Travel(String target)
+    TravelInternal(BRFS_MarkerController.Get(target))
+EndFunction
 
+Function TravelInternal(ObjectReference target)
     SetLinkedRef(target, BRFS_PackageKeyword1)
     SetLinkedRef(None, BRFS_PackageKeyword2)
     SetValue(Variable08, 1)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
 EndFunction
 
-Function TravelMarker(String target, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
-    Travel(BRFS_MarkerController.Get(target), bypassLock=True)
-
-    ReleaseLock(bypassLock)
+Function Follow(String target)
+    FollowInternal(BRFS:Util.GetPlayerOrActorByDisplayName(target))
 EndFunction
 
-Function Follow(ObjectReference target, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
+Function FollowInternal(ObjectReference target)
     SetLinkedRef(target, BRFS_PackageKeyword1)
     SetLinkedRef(None, BRFS_PackageKeyword2)
     SetValue(Variable08, 2)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
 EndFunction
 
-Function UseIdleMarker(ObjectReference target, ObjectReference secondTarget=None, Bool bypassLock=False)
-    AcquireLock(bypassLock)
+Function UseIdleMarker(String target, ObjectReference secondTarget=None)
+    UseIdleMarkerInternal(BRFS_MarkerController.Get(target), secondTarget)
+EndFunction
 
+Function UseIdleMarkerInternal(ObjectReference target, ObjectReference secondTarget=None)
     SetLinkedRef(target, BRFS_PackageKeyword1)
     SetLinkedRef(secondTarget, BRFS_PackageKeyword2)
     SetValue(Variable08, 3)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
 EndFunction
 
-Function UseIdleMarkerByName(String target, ObjectReference secondTarget=None, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
-    UseIdleMarker(BRFS_MarkerController.Get(target), secondTarget, bypassLock=True)
-
-    ReleaseLock(bypassLock)
+Function UseWeapon(String target, String loc)
+    UseWeaponInternal(BRFS:Util.GetPlayerOrActorByDisplayName(target), BRFS_MarkerController.Get(loc))
 EndFunction
 
-Function UseWeapon(ObjectReference target, ObjectReference loc, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
+Function UseWeaponInternal(ObjectReference target, ObjectReference loc)
     If loc
         SetLinkedRef(loc, BRFS_PackageKeyword1)
     EndIf
     SetLinkedRef(target, BRFS_PackageKeyword2)
     SetValue(Variable08, 4)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
-EndFunction
-
-Function UseWeaponMarker(ObjectReference target, String loc, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
-    UseWeapon(target, BRFS_MarkerController.Get(loc), bypassLock=True)
-
-    ReleaseLock(bypassLock)
 EndFunction
 
 Function ToggleUseWeapon()
-    AcquireLock()
-
     ObjectReference slot1 = GetLinkedRef(BRFS_PackageKeyword1)
     ObjectReference slot2 = GetLinkedRef(BRFS_PackageKeyword2)
 
     If IsGuard()
         If IsUsingIdleMarker() && slot2
-            UseWeapon(slot2, slot1, bypassLock=True)
+            UseWeaponInternal(slot2, slot1)
         ElseIf IsUsingWeapon()
-            UseIdleMarker(slot1, slot2, bypassLock=True)
+            UseIdleMarkerInternal(slot1, slot2)
         EndIf
     EndIf
-
-    ReleaseLock()
 EndFunction
 
-Function Patrol(ObjectReference p1, ObjectReference p2, Bool bypassLock=False)
-    AcquireLock(bypassLock)
+Function Patrol(String p1, String p2)
+    PatrolInternal(BRFS_MarkerController.Get(p1), BRFS_MarkerController.Get(p2))
+EndFunction
 
+Function PatrolInternal(ObjectReference p1, ObjectReference p2)
     SetLinkedRef(p1, BRFS_PackageKeyword1)
     SetLinkedRef(p2, BRFS_PackageKeyword2)
     SetValue(Variable08, 6)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
 EndFunction
 
-Function PatrolMarker(String p1, String p2, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
-    Patrol(BRFS_MarkerController.Get(p1), BRFS_MarkerController.Get(p2), bypassLock=True)
-
-    ReleaseLock(bypassLock)
+Function Aim(String target, String loc)
+    AimInternal(BRFS:Util.GetPlayerOrActorByDisplayName(target), BRFS_MarkerController.Get(loc))
 EndFunction
 
-Function Aim(ObjectReference target, ObjectReference loc, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
+Function AimInternal(ObjectReference target, ObjectReference loc)
     If loc
         SetLinkedRef(loc, BRFS_PackageKeyword1)
     EndIf
     SetLinkedRef(target, BRFS_PackageKeyword2)
     SetValue(Variable08, 7)
     EvaluatePackage()
-
-    ReleaseLock(bypassLock)
-EndFunction
-
-Function AimMarker(ObjectReference target, String loc, Bool bypassLock=False)
-    AcquireLock(bypassLock)
-
-    Aim(target, BRFS_MarkerController.Get(loc), bypassLock=True)
-
-    ReleaseLock(bypassLock)
 EndFunction
 
 Bool Function IsWaiting()
