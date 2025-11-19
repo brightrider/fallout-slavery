@@ -10,22 +10,22 @@ Event OnInit()
     SetGuardOutfit("1000087b,1000087e,1000088a,10000883")
 EndEvent
 
-Function AddActor(String actorType, String name="")
+Function Add(String actorType, String name="")
     If actorType == "Guard"
-        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Guard, abDeleteWhenAble=False) as BRFS:NPC
+        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Guard, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     ElseIf actorType == "Slave"
-        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abDeleteWhenAble=False) as BRFS:NPC
+        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     EndIf
 EndFunction
 
-Function ListActors()
-    BRFS:NPC[] actors = GardenOfEden2.GetFactionMembers(BRFS_Actors) as BRFS:NPC[]
+Function List()
+    BRFS:NPC[] actors = BRFS:Util.GetAllActors()
     Int i = 0
     While i < actors.Length
         System:Console.WriteLine(actors[i].GetDescription())

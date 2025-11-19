@@ -146,6 +146,27 @@ Function PatrolMarker(String p1, String p2, Bool bypassLock=False)
     ReleaseLock(bypassLock)
 EndFunction
 
+Function Aim(ObjectReference target, ObjectReference loc, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    If loc
+        SetLinkedRef(loc, BRFS_PackageKeyword1)
+    EndIf
+    SetLinkedRef(target, BRFS_PackageKeyword2)
+    SetValue(Variable08, 7)
+    EvaluatePackage()
+
+    ReleaseLock(bypassLock)
+EndFunction
+
+Function AimMarker(ObjectReference target, String loc, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    Aim(target, BRFS_MarkerController.Get(loc), bypassLock=True)
+
+    ReleaseLock(bypassLock)
+EndFunction
+
 Bool Function IsWaiting()
     Return GetValue(Variable08) as Int == 0
 EndFunction
@@ -168,6 +189,10 @@ EndFunction
 
 Bool Function IsPatrolling()
     Return GetValue(Variable08) as Int == 6
+EndFunction
+
+Bool Function IsAiming()
+    Return GetValue(Variable08) as Int == 7
 EndFunction
 
 ; TODO: Improve this
@@ -196,9 +221,11 @@ String Function GetDescription()
         procedure = "Using weapon"
     ElseIf procedureCode == 6
         procedure = "Patrolling"
+    ElseIf procedureCode == 7
+        procedure = "Aiming"
     EndIf
 
-    Return GetDisplayName() + "[" + System:Int32.ToString(GetFormID(), "{:X}") + ", " + type + ", " + aliveStatus + "] " + procedure
+    Return GetDisplayName() + "[" + GardenOfEden.GetHexFormID(Self) + ", " + type + ", " + aliveStatus + "] " + procedure
 EndFunction
 
 ; ##############################################################################

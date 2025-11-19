@@ -1,5 +1,22 @@
 Scriptname BRFS:Util Hidden Const
 
+BRFS:NPC[] Function GetAllActors() global
+    Keyword[] selector = new Keyword[1]
+    selector[0] = Game.GetFormFromFile(0x90B1, "FalloutSlavery.esp") as Keyword
+    Return GardenOfEden.FindActors(selector, None) as BRFS:NPC[]
+EndFunction
+
+BRFS:NPC Function GetActorByDisplayName(String name) global
+    BRFS:NPC[] actors = GetAllActors()
+    Int i = 0
+    While i < actors.Length
+        If actors[i].GetDisplayName() == name
+            Return actors[i]
+        EndIf
+        i += 1
+    EndWhile
+EndFunction
+
 Int[] Function StringToIntArray(String arg, String sep=",") global
     Int[] result = new Int[0]
 

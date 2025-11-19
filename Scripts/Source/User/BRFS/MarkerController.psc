@@ -7,7 +7,7 @@ Bool Lock = False
 ObjectReference Function Add(String name)
     AcquireLock()
 
-    ObjectReference marker = Game.GetPlayer().PlaceAtMe(EmptyIdleMarker, abDeleteWhenAble=False)
+    ObjectReference marker = Game.GetPlayer().PlaceAtMe(EmptyIdleMarker, abForcePersist=True, abDeleteWhenAble=False)
 
     marker.SetAngle(0.0, 0.0, marker.GetAngleZ())
 
