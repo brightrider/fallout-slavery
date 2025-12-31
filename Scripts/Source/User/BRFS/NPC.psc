@@ -11,6 +11,8 @@ Keyword Property BRFS_PackageKeyword2 Auto Const
 ActorValue Property Health Auto Const
 ActorValue Property Variable08 Auto Const
 
+WorkshopParentScript Property WorkshopParent Auto Const
+
 Bool Lock = False
 
 Event OnInit()
@@ -191,6 +193,14 @@ String Function GetDescription()
     EndIf
 
     Return GetDisplayName() + "[" + GardenOfEden.GetHexFormID(Self) + ", " + type + ", " + aliveStatus + "] " + procedure
+EndFunction
+
+Function AssignToSettlement()
+    If IsCreated()
+        WorkshopParent.AddActorToWorkshopPlayerChoice(Self)
+    Else
+        WorkshopParent.AddPermanentActorToWorkshopPlayerChoice(Self)
+    EndIf
 EndFunction
 
 ; ##############################################################################
