@@ -119,6 +119,13 @@ Function AimInternal(ObjectReference target, ObjectReference loc)
     EvaluatePackage()
 EndFunction
 
+Function Sit(ObjectReference target)
+    SetLinkedRef(target, BRFS_PackageKeyword1)
+    SetLinkedRef(None, BRFS_PackageKeyword2)
+    SetValue(Variable08, 8)
+    EvaluatePackage()
+EndFunction
+
 Bool Function IsWaiting()
     Return GetValue(Variable08) as Int == 0
 EndFunction
@@ -145,6 +152,10 @@ EndFunction
 
 Bool Function IsAiming()
     Return GetValue(Variable08) as Int == 7
+EndFunction
+
+Bool Function IsSitting()
+    Return GetValue(Variable08) as Int == 8
 EndFunction
 
 ; TODO: Improve this
@@ -175,6 +186,8 @@ String Function GetDescription()
         procedure = "Patrolling"
     ElseIf procedureCode == 7
         procedure = "Aiming"
+    ElseIf procedureCode == 8
+        procedure = "Sitting"
     EndIf
 
     Return GetDisplayName() + "[" + GardenOfEden.GetHexFormID(Self) + ", " + type + ", " + aliveStatus + "] " + procedure
