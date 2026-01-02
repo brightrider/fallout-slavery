@@ -121,7 +121,11 @@ Function AimInternal(ObjectReference target, ObjectReference loc)
     EvaluatePackage()
 EndFunction
 
-Function Sit(ObjectReference target)
+Function Sit(String target)
+    SitInternal(BRFS_MarkerController.Get(target))
+EndFunction
+
+Function SitInternal(ObjectReference target)
     SetLinkedRef(target, BRFS_PackageKeyword1)
     SetLinkedRef(None, BRFS_PackageKeyword2)
     SetValue(Variable08, 8)
@@ -172,27 +176,46 @@ String Function GetDescription()
         aliveStatus = "Dead"
     EndIf
 
+    String assignment = "Unassigned"
+    If ((Self as Actor) as WorkshopNPCScript).GetWorkshopID() != -1
+        assignment = "Assigned"
+    EndIf
+
+    Float distance = GetDistance(Game.GetPlayer())
+    If distance > 1000000.0 || distance < 0.0
+        distance = -1.0
+    EndIf
+
     String procedure = "No action assigned"
     Int procedureCode = GetValue(Variable08) as Int
     If procedureCode == 0
         procedure = "Idle"
     ElseIf procedureCode == 1
-        procedure = "Traveling"
+        procedure = "Traveling to " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
     ElseIf procedureCode == 2
-        procedure = "Following"
+        procedure = "Following " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
     ElseIf procedureCode == 3
-        procedure = "Using Idle Marker"
+        procedure = "Using Idle Marker " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName() + " with target " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
     ElseIf procedureCode == 4
-        procedure = "Using weapon"
+        procedure = "Using weapon on " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
     ElseIf procedureCode == 6
-        procedure = "Patrolling"
+        procedure = "Patrolling between " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName() + " and " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
     ElseIf procedureCode == 7
-        procedure = "Aiming"
+        procedure = "Aiming at " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
     ElseIf procedureCode == 8
-        procedure = "Sitting"
+        procedure = "Sitting at " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
     EndIf
 
-    Return GetDisplayName() + "[" + GardenOfEden.GetHexFormID(Self) + ", " + type + ", " + aliveStatus + "] " + procedure
+    Return                                                                             \
+        GetDisplayName()                                                              +\
+        "["                                                                           +\
+        GardenOfEden.GetHexFormID(Self)                                        + ", " +\
+        type                                                                   + ", " +\
+        aliveStatus                                                            + ", " +\
+        assignment                                                             + ", " +\
+        GetCurrentLocation().GetName() + "(" + distance + ")"                         +\
+        "] "                                                                          +\
+        procedure
 EndFunction
 
 Function AssignToSettlement()

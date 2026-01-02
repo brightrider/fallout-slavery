@@ -7,7 +7,7 @@ Outfit Property BRFS_Outfit_Guard_Default Auto Const
 
 Event OnInit()
     ; TODO: Remove in production
-    SetGuardOutfit("1000087b,1000087e,1000088a,10000883")
+    SetGuardOutfit("1300087b,1300087e,1300088a,13000883")
 EndEvent
 
 Function Add(String actorType, String name="")
@@ -24,11 +24,14 @@ Function Add(String actorType, String name="")
     EndIf
 EndFunction
 
-Function List()
+Function List(String filter)
     BRFS:NPC[] actors = BRFS:Util.GetAllActors()
     Int i = 0
     While i < actors.Length
-        System:Console.WriteLine(actors[i].GetDescription())
+        String desc = actors[i].GetDescription()
+        If System:Strings.Contains(desc, filter)
+            System:Console.WriteLine(desc)
+        EndIf
         i += 1
     EndWhile
 EndFunction

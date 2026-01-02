@@ -4,11 +4,16 @@ Form Property EmptyIdleMarker Auto Const
 
 Bool Lock = False
 
-ObjectReference Function Add(String name)
+ObjectReference Function Add(String name, Form markerForm=None)
     AcquireLock()
 
-    ObjectReference marker = Game.GetPlayer().PlaceAtMe(EmptyIdleMarker, abForcePersist=True, abDeleteWhenAble=False)
+    If ! markerForm
+        markerForm = EmptyIdleMarker
+    EndIf
 
+    ObjectReference marker = Game.GetPlayer().PlaceAtMe(markerForm, abForcePersist=True, abDeleteWhenAble=False)
+
+    GardenOfEden2.SetDisplayName(marker, name)
     marker.SetAngle(0.0, 0.0, marker.GetAngleZ())
 
     System:SaveVar.SetValue("BRFS_Markers", name, marker)
@@ -33,10 +38,12 @@ Bool Function Remove(String name)
     If marker
         System:SaveVar.Remove("BRFS_Markers", name)
         marker.Delete()
+        ReleaseLock()
+        Return True
     EndIf
 
     ReleaseLock()
-    Return True
+    Return False
 EndFunction
 
 String[] Function GetNames()
@@ -48,11 +55,13 @@ String[] Function GetNames()
     Return names
 EndFunction
 
-Function List()
+Function List(String filter)
     String[] names = GetNames()
     Int i = 0
     While i < names.Length
-        System:Console.WriteLine(names[i])
+        If System:Strings.Contains(names[i], filter)
+            System:Console.WriteLine(names[i])
+        EndIf
         i += 1
     EndWhile
 EndFunction
