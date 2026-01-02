@@ -2,6 +2,9 @@ Scriptname BRFS:MarkerController extends Quest
 
 Form Property EmptyIdleMarker Auto Const
 
+Var[] Markers
+Var[] MarkerNames
+
 Bool Lock = False
 
 ObjectReference Function Add(String name, Form markerForm=None)
@@ -13,10 +16,10 @@ ObjectReference Function Add(String name, Form markerForm=None)
 
     ObjectReference marker = Game.GetPlayer().PlaceAtMe(markerForm, abForcePersist=True, abDeleteWhenAble=False)
 
-    GardenOfEden2.SetDisplayName(marker, name)
     marker.SetAngle(0.0, 0.0, marker.GetAngleZ())
 
-    System:SaveVar.SetValue("BRFS_Markers", name, marker)
+    Markers = System:Array.Add(Markers, marker)
+    MarkerNames = System:Array.Add(MarkerNames, name)
 
     ReleaseLock()
     Return marker
@@ -25,18 +28,25 @@ EndFunction
 ObjectReference Function Get(String name)
     AcquireLock()
 
-    ObjectReference marker = System:SaveVar.GetValue("BRFS_Markers", name) as ObjectReference
+    Int index = System:Array.IndexOf(MarkerNames, name)
+    If index >= 0
+        ObjectReference marker = Markers[index] as ObjectReference
+        ReleaseLock()
+        Return marker
+    EndIf
 
     ReleaseLock()
-    Return marker
+    Return None
 EndFunction
 
 Bool Function Remove(String name)
     AcquireLock()
 
-    ObjectReference marker = System:SaveVar.GetValue("BRFS_Markers", name) as ObjectReference
-    If marker
-        System:SaveVar.Remove("BRFS_Markers", name)
+    Int index = System:Array.IndexOf(MarkerNames, name)
+    If index >= 0
+        ObjectReference marker = Markers[index] as ObjectReference
+        Markers = System:Array.RemoveAt(Markers, index)
+        MarkerNames = System:Array.RemoveAt(MarkerNames, index)
         marker.Delete()
         ReleaseLock()
         Return True
@@ -46,21 +56,11 @@ Bool Function Remove(String name)
     Return False
 EndFunction
 
-String[] Function GetNames()
-    AcquireLock()
-
-    String[] names = System:SaveVar.GetKeys("BRFS_Markers")
-
-    ReleaseLock()
-    Return names
-EndFunction
-
 Function List(String filter)
-    String[] names = GetNames()
     Int i = 0
-    While i < names.Length
-        If System:Strings.Contains(names[i], filter)
-            System:Console.WriteLine(names[i])
+    While i < System:Array.Count(MarkerNames)
+        If System:Strings.Contains(MarkerNames[i], filter)
+            System:Console.WriteLine(MarkerNames[i] + " (" + (Markers[i] as ObjectReference).GetCurrentLocation().GetName() + ")")
         EndIf
         i += 1
     EndWhile
