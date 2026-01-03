@@ -24,8 +24,12 @@ Function Add(String actorType, String name="")
     EndIf
 EndFunction
 
-Function List(String filter)
-    BRFS:NPC[] actors = BRFS:Util.GetAllActors()
+Function List(String filter, Float radius)
+    If radius == 0.0
+        radius = 10240.0
+    EndIf
+
+    BRFS:NPC[] actors = BRFS:Util.GetAllActors(radius)
     Int i = 0
     While i < actors.Length
         String desc = actors[i].GetDescription()
@@ -48,6 +52,71 @@ Function CreateConvoyInternal(ObjectReference[] members)
     Int i = 1
     While i < members.Length
         (members[i] as BRFS:NPC).FollowInternal(members[i - 1])
+        i += 1
+    EndWhile
+EndFunction
+
+Function ExecutionSetup(String guards, String slaves, String markerGridName)
+    ExecutionSetupInternal(BRFS:Util.DisplayNamesToRefArray(guards), BRFS:Util.DisplayNamesToRefArray(slaves), markerGridName)
+EndFunction
+
+Function ExecutionSetupInternal(ObjectReference[] guards, ObjectReference[] slaves, String markerGridName)
+    BRFS:MarkerController markerController = Game.GetFormFromFile(0x000090B6, "FalloutSlavery.esp") as BRFS:MarkerController
+
+    Int i = 0
+    While i < guards.Length
+        BRFS:NPC guard = guards[i] as BRFS:NPC
+        BRFS:NPC slave = slaves[i] as BRFS:NPC
+        guard.UseInternal(markerController.Get(markerGridName + i), slave)
+        slave.UseInternal(markerController.Get(markerGridName + (guards.Length + i)))
+        i += 1
+    EndWhile
+EndFunction
+
+Function ExecutionIdle()
+    BRFS:NPC[] actors = BRFS:Util.GetAllActors(1024.0)
+    Int i = 0
+    While i < actors.Length
+        BRFS:NPC npc = actors[i]
+        If npc.IsGuard() && (npc.IsUsingIdleMarker() || npc.IsAiming() || npc.IsUsingWeapon() || npc.IsUsingWeaponOnce())
+            npc.UseIdleMarkerInternal(None, None)
+        EndIf
+        i += 1
+    EndWhile
+EndFunction
+
+Function ExecutionAim()
+    BRFS:NPC[] actors = BRFS:Util.GetAllActors(1024.0)
+    Int i = 0
+    While i < actors.Length
+        BRFS:NPC npc = actors[i]
+        If npc.IsGuard() && (npc.IsUsingIdleMarker() || npc.IsAiming() || npc.IsUsingWeapon() || npc.IsUsingWeaponOnce())
+            npc.AimInternal(None, None)
+        EndIf
+        i += 1
+    EndWhile
+EndFunction
+
+Function ExecutionFire()
+    BRFS:NPC[] actors = BRFS:Util.GetAllActors(1024.0)
+    Int i = 0
+    While i < actors.Length
+        BRFS:NPC npc = actors[i]
+        If npc.IsGuard() && (npc.IsUsingIdleMarker() || npc.IsAiming() || npc.IsUsingWeapon() || npc.IsUsingWeaponOnce())
+            npc.UseWeaponInternal(None, None)
+        EndIf
+        i += 1
+    EndWhile
+EndFunction
+
+Function ExecutionFireOnce()
+    BRFS:NPC[] actors = BRFS:Util.GetAllActors(1024.0)
+    Int i = 0
+    While i < actors.Length
+        BRFS:NPC npc = actors[i]
+        If npc.IsGuard() && (npc.IsUsingIdleMarker() || npc.IsAiming() || npc.IsUsingWeapon() || npc.IsUsingWeaponOnce())
+            npc.UseWeaponOnceInternal(None, None)
+        EndIf
         i += 1
     EndWhile
 EndFunction

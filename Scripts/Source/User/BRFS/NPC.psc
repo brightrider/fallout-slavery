@@ -23,6 +23,14 @@ Event OnInit()
     EndIf
 EndEvent
 
+Function Rename(String name)
+    If ! name
+        Return
+    EndIf
+
+    GardenOfEden2.SetDisplayName(Self, name)
+EndFunction
+
 Bool Function IsGuard()
     Return IsInFaction(BRFS_Guards)
 EndFunction
@@ -65,8 +73,12 @@ Function UseIdleMarker(String target, ObjectReference secondTarget=None)
 EndFunction
 
 Function UseIdleMarkerInternal(ObjectReference target, ObjectReference secondTarget=None)
-    SetLinkedRef(target, BRFS_PackageKeyword1)
-    SetLinkedRef(secondTarget, BRFS_PackageKeyword2)
+    If target
+        SetLinkedRef(target, BRFS_PackageKeyword1)
+    EndIf
+    If secondTarget
+        SetLinkedRef(secondTarget, BRFS_PackageKeyword2)
+    EndIf
     SetValue(Variable08, 3)
     EvaluatePackage()
 EndFunction
@@ -79,7 +91,9 @@ Function UseWeaponInternal(ObjectReference target, ObjectReference loc)
     If loc
         SetLinkedRef(loc, BRFS_PackageKeyword1)
     EndIf
-    SetLinkedRef(target, BRFS_PackageKeyword2)
+    If target
+        SetLinkedRef(target, BRFS_PackageKeyword2)
+    EndIf
     SetValue(Variable08, 4)
     EvaluatePackage()
 EndFunction
@@ -116,7 +130,9 @@ Function AimInternal(ObjectReference target, ObjectReference loc)
     If loc
         SetLinkedRef(loc, BRFS_PackageKeyword1)
     EndIf
-    SetLinkedRef(target, BRFS_PackageKeyword2)
+    If target
+        SetLinkedRef(target, BRFS_PackageKeyword2)
+    EndIf
     SetValue(Variable08, 7)
     EvaluatePackage()
 EndFunction
@@ -130,6 +146,31 @@ Function SitInternal(ObjectReference target)
     SetLinkedRef(None, BRFS_PackageKeyword2)
     SetValue(Variable08, 8)
     EvaluatePackage()
+EndFunction
+
+Function UseWeaponOnce(String target, String loc)
+    UseWeaponOnceInternal(BRFS:Util.GetPlayerOrActorByDisplayName(target), BRFS_MarkerController.Get(loc))
+EndFunction
+
+Function UseWeaponOnceInternal(ObjectReference target, ObjectReference loc)
+    If loc
+        SetLinkedRef(loc, BRFS_PackageKeyword1)
+    EndIf
+    SetLinkedRef(target, BRFS_PackageKeyword2)
+    SetValue(Variable08, 9)
+    EvaluatePackage()
+EndFunction
+
+Function Use(String target)
+    UseInternal(BRFS_MarkerController.Get(target))
+EndFunction
+
+Function UseInternal(ObjectReference target, ObjectReference secondTarget=None)
+    If target.GetBaseObject() is IdleMarker
+        UseIdleMarkerInternal(target, secondTarget)
+    Else
+        SitInternal(target)
+    EndIf
 EndFunction
 
 Bool Function IsWaiting()
@@ -164,6 +205,10 @@ Bool Function IsSitting()
     Return GetValue(Variable08) as Int == 8
 EndFunction
 
+Bool Function IsUsingWeaponOnce()
+    Return GetValue(Variable08) as Int == 9
+EndFunction
+
 ; TODO: Improve this
 String Function GetDescription()
     String type = "Guard"
@@ -196,7 +241,7 @@ String Function GetDescription()
         procedure = "Following " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
     ElseIf procedureCode == 3
         procedure = "Using Idle Marker " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName() + " with target " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
-    ElseIf procedureCode == 4
+    ElseIf procedureCode == 4 || procedureCode == 9
         procedure = "Using weapon on " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
     ElseIf procedureCode == 6
         procedure = "Patrolling between " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName() + " and " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()

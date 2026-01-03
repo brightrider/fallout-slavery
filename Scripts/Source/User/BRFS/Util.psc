@@ -1,9 +1,9 @@
 Scriptname BRFS:Util Hidden Const
 
-BRFS:NPC[] Function GetAllActors() global
+BRFS:NPC[] Function GetAllActors(Float radius=-1.0) global
     Keyword[] selector = new Keyword[1]
     selector[0] = Game.GetFormFromFile(0x90B1, "FalloutSlavery.esp") as Keyword
-    Return GardenOfEden.FindActors(selector, None) as BRFS:NPC[]
+    Return GardenOfEden.FindActors(selector, None, akOrigoRef=Game.GetPlayer(), afDistance=radius) as BRFS:NPC[]
 EndFunction
 
 BRFS:NPC Function GetActorByDisplayName(String name) global
