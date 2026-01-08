@@ -56,6 +56,32 @@ Function CreateConvoyInternal(ObjectReference[] members)
     EndWhile
 EndFunction
 
+Function TrackOnMap(Int slot, String target)
+    TrackOnMapInternal(slot, BRFS:Util.GetActorByDisplayName(target))
+EndFunction
+
+Function TrackOnMapInternal(Int slot, ObjectReference target)
+    (GetAlias(slot + 1) as ReferenceAlias).ForceRefTo(target)
+    SetObjectiveDisplayed(slot, abForce=True)
+EndFunction
+
+Function ListT()
+    String result
+    Int i
+    While i < 10
+        ObjectReference ref = (GetAlias(i + 1) as ReferenceAlias).GetReference()
+        result += "Slot " + i + ": " + ref.GetDisplayName() + "\n"
+        i += 1
+    EndWhile
+
+    System:Console.WriteLine(result)
+EndFunction
+
+Function UntrackOnMap(Int slot)
+    SetObjectiveDisplayed(slot, False, abForce=True)
+    (GetAlias(slot + 1) as ReferenceAlias).Clear()
+EndFunction
+
 Function ExecutionSetup(String guards, String slaves, String markerGridName)
     ExecutionSetupInternal(BRFS:Util.DisplayNamesToRefArray(guards), BRFS:Util.DisplayNamesToRefArray(slaves), markerGridName)
 EndFunction
