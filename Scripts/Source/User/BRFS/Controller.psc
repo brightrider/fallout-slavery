@@ -2,26 +2,45 @@ Scriptname BRFS:Controller extends Quest
 
 ActorBase Property BRFS_Guard Auto Const
 ActorBase Property BRFS_Slave Auto Const
+LeveledActor Property BRFS_LC Auto Const
+LeveledActor Property BRFS_LC_Main Auto Const
+LeveledActor Property BRFS_LC_Child Auto Const
 Faction Property BRFS_Actors Auto Const
 Outfit Property BRFS_Outfit_Guard_Default Auto Const
 
+Bool Lock = False
+
 Event OnInit()
+    ReadNpcTemplates()
+
     ; TODO: Remove in production
     SetGuardOutfit("1300087b,1300087e,1300088a,13000883")
 EndEvent
 
 Function Add(String actorType, String name="")
+    AcquireLock()
+
     If actorType == "Guard"
+        SelectNpcTemplateList(BRFS_LC_Main)
         BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Guard, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     ElseIf actorType == "Slave"
+        SelectNpcTemplateList(BRFS_LC_Main)
+        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
+        If name != ""
+            GardenOfEden2.SetDisplayName(newActor, name)
+        EndIf
+    ElseIf actorType == "Child"
+        SelectNpcTemplateList(BRFS_LC_Child)
         BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     EndIf
+
+    ReleaseLock()
 EndFunction
 
 Function List(String filter, Float radius)
@@ -146,3 +165,48 @@ Function ExecutionFireOnce()
         i += 1
     EndWhile
 EndFunction
+
+Function ReadNpcTemplates()
+    AcquireLock()
+
+    BRFS_LC_Main.Revert()
+
+    String[] npcTemplates = System:IO:File.ReadAllLines("Data/BRFS/npc-templates.txt")
+    Int i
+    While i < npcTemplates.Length
+        String[] parts = System:Strings.Split(npcTemplates[i], ":")
+        BRFS_LC_Main.AddForm(Game.GetFormFromFile(System:Int32.TryParse(parts[1], 16), parts[0]), 1)
+
+        i += 1
+    EndWhile
+
+    ReleaseLock()
+EndFunction
+
+; ##############################################################################
+; # Private Functions
+; ##############################################################################
+Function SelectNpcTemplateList(LeveledActor list)
+    BRFS_LC.Revert()
+    BRFS_LC.AddForm(list, 1)
+EndFunction
+
+Function AcquireLock(Bool bypass=False, Float spinDelay=0.001)
+    If bypass
+        Return
+    EndIf
+
+    While Lock
+        Utility.Wait(spinDelay)
+    EndWhile
+    Lock = True
+EndFunction
+
+Function ReleaseLock(Bool bypass=False)
+    If bypass
+        Return
+    EndIf
+
+    Lock = False
+EndFunction
+; ##############################################################################
