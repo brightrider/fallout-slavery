@@ -2,7 +2,9 @@ Scriptname BRFS:NPC extends Actor
 
 BRFS:MarkerController Property BRFS_MarkerController Auto Const
 
+Faction Property BRFS_Actors Auto Const
 Faction Property BRFS_Guards Auto Const
+Faction Property BRFS_Guards_Trader Auto Const
 Faction Property BRFS_Slaves Auto Const
 
 Keyword Property BRFS_PackageKeyword1 Auto Const
@@ -20,6 +22,14 @@ Event OnInit()
 
     If IsSlave()
         SetValue(Health, 1.0)
+    EndIf
+EndEvent
+
+Event OnActivate(ObjectReference akActionRef)
+    BRFS:Controller controller = Game.GetFormFromFile(0x90B5, "FalloutSlavery.esp") as BRFS:Controller
+
+    If IsInFaction(BRFS_Guards_Trader)
+        controller.BuyActor()
     EndIf
 EndEvent
 
@@ -156,7 +166,9 @@ Function UseWeaponOnceInternal(ObjectReference target, ObjectReference loc)
     If loc
         SetLinkedRef(loc, BRFS_PackageKeyword1)
     EndIf
-    SetLinkedRef(target, BRFS_PackageKeyword2)
+    If target
+        SetLinkedRef(target, BRFS_PackageKeyword2)
+    EndIf
     SetValue(Variable08, 9)
     EvaluatePackage()
 EndFunction
@@ -236,19 +248,19 @@ String Function GetDescription()
     If procedureCode == 0
         procedure = "Idle"
     ElseIf procedureCode == 1
-        procedure = "Traveling to " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
+        procedure = "Traveling to " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword1))
     ElseIf procedureCode == 2
-        procedure = "Following " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
+        procedure = "Following " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword1))
     ElseIf procedureCode == 3
-        procedure = "Using Idle Marker " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName() + " with target " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
+        procedure = "Using Idle Marker " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword1))
     ElseIf procedureCode == 4 || procedureCode == 9
-        procedure = "Using weapon on " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
+        procedure = "Using weapon on " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword2))
     ElseIf procedureCode == 6
-        procedure = "Patrolling between " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName() + " and " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
+        procedure = "Patrolling between " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword1)) + " and " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword2))
     ElseIf procedureCode == 7
-        procedure = "Aiming at " + GetLinkedRef(BRFS_PackageKeyword2).GetDisplayName()
+        procedure = "Aiming at " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword2))
     ElseIf procedureCode == 8
-        procedure = "Sitting at " + GetLinkedRef(BRFS_PackageKeyword1).GetDisplayName()
+        procedure = "Sitting at " + BRFS:Util.GetName(GetLinkedRef(BRFS_PackageKeyword1))
     EndIf
 
     Return                                                                             \
@@ -269,6 +281,12 @@ Function AssignToSettlement()
     Else
         WorkshopParent.AddPermanentActorToWorkshopPlayerChoice(Self)
     EndIf
+EndFunction
+
+Function RemoveFromBRFS()
+    RemoveFromFaction(BRFS_Actors)
+    RemoveFromFaction(BRFS_Guards)
+    RemoveFromFaction(BRFS_Slaves)
 EndFunction
 
 ; ##############################################################################

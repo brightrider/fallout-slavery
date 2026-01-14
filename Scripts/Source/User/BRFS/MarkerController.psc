@@ -44,12 +44,27 @@ ObjectReference Function Get(String name, Bool bypassLock=False)
     Return None
 EndFunction
 
-Function Rename(String oldName, String newName)
-    If ! newName
-        Return
+String Function GetMarkerName(ObjectReference marker, Bool bypassLock=False)
+    AcquireLock(bypassLock)
+
+    Int index = System:Array.IndexOf(Markers, marker)
+    If index >= 0
+        String name = MarkerNames[index]
+        ReleaseLock(bypassLock)
+        Return name
     EndIf
 
+    ReleaseLock(bypassLock)
+    Return ""
+EndFunction
+
+Function Rename(String oldName, String newName)
     AcquireLock()
+
+    If ! newName || Get(newName, bypassLock=True)
+        ReleaseLock()
+        Return
+    EndIf
 
     Int index = System:Array.IndexOf(MarkerNames, oldName)
     If index >= 0
@@ -83,9 +98,24 @@ Function List(String filter, Float radius)
 
     Int i = 0
     While i < System:Array.Count(MarkerNames)
-        If radius <= 0.0 || (Markers[i] as ObjectReference).GetDistance(Game.GetPlayer()) <= radius
-            If System:Strings.Contains(MarkerNames[i], filter)
-                System:Console.WriteLine(MarkerNames[i] + " (" + (Markers[i] as ObjectReference).GetCurrentLocation().GetName() + ")")
+        String name = MarkerNames[i]
+        ObjectReference marker = Markers[i] as ObjectReference
+
+        Float distance = marker.GetDistance(Game.GetPlayer())
+        If radius <= 0.0 || distance <= radius
+            If distance > 1000000.0 || distance < 0.0
+                distance = -1.0
+            EndIf
+
+            name += "["
+            name += GardenOfEden.GetHexFormID(marker) + ", "
+            name += BRFS:Util.GetName(marker, skipMarkerName=True) + ", "
+            name += marker.GetCurrentLocation().GetName() + "(" + distance + ")"
+            name += "]"
+            name += "\n"
+
+            If System:Strings.Contains(name, filter)
+                System:Console.WriteLine(name)
             EndIf
         EndIf
         i += 1

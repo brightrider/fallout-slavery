@@ -8,6 +8,10 @@ LeveledActor Property BRFS_LC_Child Auto Const
 Faction Property BRFS_Actors Auto Const
 Outfit Property BRFS_Outfit_Guard_Default Auto Const
 
+Faction Property REPlayerAlly Auto Const
+
+Message Property BRFS_SelectNpcType Auto Const
+
 Bool Lock = False
 
 Event OnInit()
@@ -17,30 +21,74 @@ Event OnInit()
     SetGuardOutfit("1300087b,1300087e,1300088a,13000883")
 EndEvent
 
-Function Add(String actorType, String name="")
+BRFS:NPC Function Add(String actorType, String name="")
     AcquireLock()
+
+    BRFS:NPC newActor
 
     If actorType == "Guard"
         SelectNpcTemplateList(BRFS_LC_Main)
-        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Guard, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
+        newActor = Game.GetPlayer().PlaceAtMe(BRFS_Guard, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     ElseIf actorType == "Slave"
         SelectNpcTemplateList(BRFS_LC_Main)
-        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
+        newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     ElseIf actorType == "Child"
         SelectNpcTemplateList(BRFS_LC_Child)
-        BRFS:NPC newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
+        newActor = Game.GetPlayer().PlaceAtMe(BRFS_Slave, abForcePersist=True, abDeleteWhenAble=False) as BRFS:NPC
         If name != ""
             GardenOfEden2.SetDisplayName(newActor, name)
         EndIf
     EndIf
 
     ReleaseLock()
+    Return newActor
+EndFunction
+
+Function BuyActor()
+    Actor player = Game.GetPlayer()
+    Form caps = Game.GetForm(0xF)
+
+    Int npcType = BRFS_SelectNpcType.Show()
+    If npcType == 4
+        Return
+    EndIf
+
+    If npcType == 0
+        If player.GetItemCount(caps) >= 500
+            player.RemoveItem(caps, 500)
+            BRFS:NPC newActor = Add("Guard", "")
+            newActor.AddToFaction(REPlayerAlly)
+        Else
+            Debug.Notification("You don't have enough caps.")
+        EndIf
+    ElseIf npcType == 1
+        If player.GetItemCount(caps) >= 500
+            player.RemoveItem(caps, 500)
+            Add("Slave", "")
+        Else
+            Debug.Notification("You don't have enough caps.")
+        EndIf
+    ElseIf npcType == 2
+        If player.GetItemCount(caps) >= 1000
+            player.RemoveItem(caps, 1000)
+            Add("Slave", "")
+        Else
+            Debug.Notification("You don't have enough caps.")
+        EndIf
+    ElseIf npcType == 3
+        If player.GetItemCount(caps) >= 500
+            player.RemoveItem(caps, 500)
+            Add("Child", "")
+        Else
+            Debug.Notification("You don't have enough caps.")
+        EndIf
+    EndIf
 EndFunction
 
 Function List(String filter, Float radius)
@@ -76,7 +124,7 @@ Function CreateConvoyInternal(ObjectReference[] members)
 EndFunction
 
 Function TrackOnMap(Int slot, String target)
-    TrackOnMapInternal(slot, BRFS:Util.GetActorByDisplayName(target))
+    TrackOnMapInternal(slot, BRFS:Util.GetRef(target))
 EndFunction
 
 Function TrackOnMapInternal(Int slot, ObjectReference target)
@@ -89,7 +137,7 @@ Function ListT()
     Int i
     While i < 10
         ObjectReference ref = (GetAlias(i + 1) as ReferenceAlias).GetReference()
-        result += "Slot " + i + ": " + ref.GetDisplayName() + "\n"
+        result += "Slot " + i + ": " + BRFS:Util.GetName(ref) + "\n"
         i += 1
     EndWhile
 
