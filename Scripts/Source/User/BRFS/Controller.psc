@@ -18,7 +18,7 @@ Event OnInit()
     ReadNpcTemplates()
 
     ; TODO: Remove in production
-    SetGuardOutfit("1300087b,1300087e,1300088a,13000883")
+    SetGuardOutfit("1100087b,1100087e,1100088a,11000883")
 EndEvent
 
 BRFS:NPC Function Add(String actorType, String name="")
